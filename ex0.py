@@ -30,12 +30,12 @@ username = "N.P.MULJI"
 newline = "\n"
 requestString = requestType + " " + connectionSpecifier + " " + str(usernum) + " " + username + newline
 
+print requestString
 # writing the client requestString to the socket
 sock.send(requestString.encode())
 
 # server confirmation
 response1 = sock.recv(1024).decode()
-
 if (response1.split()[0] != "CS"):
     print "There was an error: "
     print response1
@@ -44,7 +44,6 @@ if (response1.split()[0] != "CS"):
 response2 = sock.recv(1024).decode()
 serverConfirmation = response1 + response2
 print serverConfirmation
-
 
 if (response2.split()[0] != "OK"):
     print "Error has occured, server did not respond with 'OK'"
