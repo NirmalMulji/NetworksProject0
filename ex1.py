@@ -58,7 +58,7 @@ if (response1.split()[0] != "CS"):
     sys.exit(1)
 
 response2 = sock.recv(1024).decode()
-
+# make sure server responds with  'OK' 
 if (response2.split()[0] != "OK"):
     print "Error has occured, server did not respond with 'OK'"
     print response1
@@ -68,12 +68,25 @@ if (response2.split()[0] != "OK"):
 serverConfirmation = response1 + response2
 print serverConfirmation
 
+# save the random number
 serverNum = int(response2.split()[3])
-x, y = psock.accept()
+newsock, address = psock.accept()
 
-print "x: " + x
-print y
+#read bytes from connection socket
+sentence = newsock.recv(1024).decode()
+print sentence 
+newservernum = int(sentence.split()[-1])
+print("CS 356 server sent " + str(newservernum))
+message = str(serverNum + 1) + " " + str(newservernum + 1) + " "
 
+#send the string then close new sockets
+newsock.send(message.encode())
+newsock.close()
+psock.close()
 
+#receive data on the original connection then close the socket
+data = sock.recv(1024).decode()
+print data
+sock.close()
 
 
