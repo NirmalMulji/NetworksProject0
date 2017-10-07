@@ -6,7 +6,7 @@ serverName = "paris.cs.utexas.edu"
 serverPort = 35601
 serverIP = gethostbyname(serverName)
 
-# creates a TCP socket #
+# client creates a TCP socket
 sock = socket(AF_INET, SOCK_STREAM)
 
 # client opens a connection to the server's socket
@@ -16,23 +16,39 @@ except Exception:
     print "There was an error opening a connection to the server, check your server and port name"
     sys.exit(1)
 
-# forming the request string
-requestType = "ex0"
+
 clientIP, clientPort = sock.getsockname()
-
-serverEndpointSpecifier = serverIP + "-" + str(serverPort)
-clientEndpointSpecifier = clientIP + "-" + str(clientPort)
-
-connectionSpecifier = serverEndpointSpecifier + " " + clientEndpointSpecifier
-
 usernum = randint(0, 9000)
 username = "N.P.MULJI"
 newline = "\n"
+
+# new socket connection
+psock = socket(AF_INET, SOCK_STREAM)
+
+newPort = clientPort + 1
+psock.bind((gethostname(), newPort))
+psock.listen(1)
+
+# forming the request string
+requestType = "ex1"
+
+# address and port psock is bound to so client can see what's going on
+print "psock address: " + psock.getsockname()[0]
+print "psock port: ", psock.getsockname()[1]
+
+
+serverEndpointSpecifier = serverIP + "-" + str(serverPort)
+clientEndpointSpecifier = psock.getsockname()[0] + "-" + str(psock.getsockname()[1])
+
+connectionSpecifier = serverEndpointSpecifier + " " + clientEndpointSpecifier
+
 requestString = requestType + " " + connectionSpecifier + " " + str(usernum) + " " + username + newline
 
 print requestString
+
 # writing the client requestString to the socket
 sock.send(requestString.encode())
+
 
 # server confirmation
 response1 = sock.recv(1024).decode()
@@ -43,32 +59,20 @@ if (response1.split()[0] != "CS"):
 
 response2 = sock.recv(1024).decode()
 
-
 if (response2.split()[0] != "OK"):
     print "Error has occured, server did not respond with 'OK'"
     print response1
+    sock.close()
     sys.exit(1)
 
 serverConfirmation = response1 + response2
 print serverConfirmation
 
-# writing ack string to the socket
 serverNum = int(response2.split()[3])
-ackString = requestType + " " + str(usernum + 1) + " " + str(serverNum + 1) + newline
-sock.send(ackString.encode())
-print ackString
+x, y = psock.accept()
 
-# reading data from socket
-serverConfirmation2 = sock.recv(1024).decode()
-if (serverConfirmation2.split()[-2] != "OK"):
-    print "Error has occured reading data from the socket: "
-    print serverConfirmation2
-    sys.exit(1)
-
-print serverConfirmation2
-
-sock.close()
-
+print "x: " + x
+print y
 
 
 
